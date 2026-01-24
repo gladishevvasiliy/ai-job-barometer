@@ -1,65 +1,202 @@
-import Image from "next/image";
+'use client'
+
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { Barometer } from '@/components/Barometer'
+import { Button } from '@/components/ui/Button'
+import { AuthModal } from '@/components/AuthModal'
+import { SpecialtyModal } from '@/components/SpecialtyModal'
+import { ShareModal } from '@/components/ShareModal'
+import { Filters } from '@/components/Filters'
+import { Specialty, VoteType, Stats, Vote } from '@/types'
+import { initPostHog, captureEvent } from '@/lib/posthog'
+import { User } from '@supabase/supabase-js'
 
 export default function Home() {
+  const supabase = createClient()
+  const [user, setUser] = useState<User | null>(null)
+  const [userVote, setUserVote] = useState<Vote | null>(null)
+  const [stats, setStats] = useState<Stats>({ totalVotes: 0, workingCount: 0, aiReplacedCount: 0, percentage: 0 })
+  const [selectedSpecialty, setSelectedSpecialty] = useState<Specialty | 'all'>('all')
+  const [selectedPeriod, setSelectedPeriod] = useState('all')
+  
+  // Modals
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [isSpecialtyModalOpen, setIsSpecialtyModalOpen] = useState(false)
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  
+  // Pending vote action
+  const [pendingVote, setPendingVote] = useState<VoteType | null>(null)
+
+  useEffect(() => {
+    initPostHog()
+    
+    // Auth listener
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    fetchStats()
+    fetchUserVote()
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  useEffect(() => {
+    fetchStats()
+  }, [selectedSpecialty, selectedPeriod])
+
+  const fetchStats = async () => {
+    const res = await fetch(`/api/stats?specialty=${selectedSpecialty}&period=${selectedPeriod}`)
+    const data = await res.json()
+    if (!data.error) setStats(data)
+  }
+
+  const fetchUserVote = async () => {
+    const res = await fetch('/api/votes')
+    const data = await res.json()
+    if (data.vote) setUserVote(data.vote)
+  }
+
+  const handleVoteClick = (type: VoteType) => {
+    setPendingVote(type)
+    if (!user) {
+      setIsAuthModalOpen(true)
+    } else {
+      setIsSpecialtyModalOpen(true)
+    }
+  }
+
+  const handleSpecialtySelect = async (specialty: Specialty) => {
+    if (!pendingVote) return
+
+    setIsSpecialtyModalOpen(false)
+    
+    try {
+      const res = await fetch('/api/votes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vote_type: pendingVote, specialty })
+      })
+      const data = await res.json()
+
+      if (data.error) {
+        if (data.error === 'Cooldown') {
+          alert(data.message)
+        } else {
+          console.error(data.error)
+        }
+        return
+      }
+
+      setUserVote(data.vote)
+      fetchStats()
+      setIsShareModalOpen(true)
+      captureEvent('vote_cast', { type: pendingVote, specialty })
+    } catch (error) {
+      console.error('Failed to cast vote:', error)
+    }
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen bg-slate-50 px-4 py-12 md:py-20">
+      <div className="mx-auto max-w-4xl">
+        {/* Header */}
+        <div className="text-center">
+          <h1 className="text-4xl font-black tracking-tight text-slate-900 md:text-6xl">
+            AI Job Barometer
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mx-auto mt-4 max-w-lg text-lg text-slate-600">
+            Real-time sentiment tracker for developers. 
+            Are we thriving or being replaced?
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Barometer Section */}
+        <div className="mt-16 rounded-3xl bg-white p-8 shadow-sm md:p-12">
+          <Barometer 
+            percentage={stats.percentage} 
+            isRevealed={!!userVote} 
+            totalVotes={stats.totalVotes}
+          />
+
+          <div className="mt-12 flex flex-col items-center gap-6">
+            {!userVote ? (
+              <div className="flex flex-wrap justify-center gap-4">
+                <Button 
+                  variant="success" 
+                  size="lg" 
+                  className="h-16 px-8 text-xl font-bold shadow-lg shadow-green-200"
+                  onClick={() => handleVoteClick('working')}
+                >
+                  🟢 I&apos;m Working
+                </Button>
+                <Button 
+                  variant="danger" 
+                  size="lg" 
+                  className="h-16 px-8 text-xl font-bold shadow-lg shadow-red-200"
+                  onClick={() => handleVoteClick('ai_replaced')}
+                >
+                  🔴 AI Got My Job
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center">
+                <p className="text-lg font-medium text-slate-700">
+                  You voted: <span className={userVote.vote_type === 'working' ? 'text-green-600' : 'text-red-600 font-bold'}>
+                    {userVote.vote_type === 'working' ? "I'm Working" : "AI Got My Job"}
+                  </span>
+                </p>
+                <Button 
+                  variant="ghost" 
+                  className="mt-2 text-slate-400"
+                  onClick={() => handleVoteClick(userVote.vote_type)}
+                >
+                  Change vote
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
-      </main>
-    </div>
-  );
+
+        {/* Filters */}
+        <div className="mt-8">
+          <Filters 
+            specialty={selectedSpecialty}
+            period={selectedPeriod}
+            onSpecialtyChange={setSelectedSpecialty}
+            onPeriodChange={setSelectedPeriod}
+          />
+        </div>
+
+        {/* Footer */}
+        <footer className="mt-20 border-t border-slate-200 pt-8 text-center text-sm text-slate-400">
+          <p>© 2026 AI Job Barometer. Built for the community.</p>
+        </footer>
+      </div>
+
+      {/* Modals */}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
+      <SpecialtyModal 
+        isOpen={isSpecialtyModalOpen} 
+        onClose={() => setIsSpecialtyModalOpen(false)} 
+        onSelect={handleSpecialtySelect}
+      />
+      {userVote && (
+        <ShareModal 
+          isOpen={isShareModalOpen} 
+          onClose={() => setIsShareModalOpen(false)} 
+          voteType={userVote.vote_type}
+          specialty={userVote.specialty}
+        />
+      )}
+    </main>
+  )
 }
