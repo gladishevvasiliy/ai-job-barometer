@@ -74,6 +74,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 {loading === 'twitter' ? 'Redirecting...' : 'Continue with Twitter'}
               </Button>
 
+              {/* LinkedIn hidden for now */}
+              {/* 
               <Button
                 variant="outline"
                 size="lg"
@@ -84,6 +86,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 <Linkedin className="fill-[#0A66C2] text-[#0A66C2]" size={20} />
                 {loading === 'linkedin' ? 'Redirecting...' : 'Continue with LinkedIn'}
               </Button>
+              */}
             </div>
 
             <p className="mt-6 text-center text-xs text-slate-400">
