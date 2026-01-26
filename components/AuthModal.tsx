@@ -15,7 +15,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [loading, setLoading] = useState<string | null>(null)
   const supabase = createClient()
 
-  const handleSignIn = async (provider: 'twitter' | 'linkedin') => {
+  const handleSignIn = async (provider: 'x' | 'linkedin') => {
     setLoading(provider)
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -67,7 +67,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 variant="outline"
                 size="lg"
                 className="flex items-center justify-center gap-3 border-2 border-slate-100 hover:border-slate-200"
-                onClick={() => handleSignIn('twitter')}
+                onClick={() => handleSignIn('x')}
                 disabled={!!loading}
               >
                 <Twitter className="fill-[#1DA1F2] text-[#1DA1F2]" size={20} />
