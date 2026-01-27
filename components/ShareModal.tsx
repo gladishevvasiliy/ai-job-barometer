@@ -56,23 +56,23 @@ export function ShareModal({ isOpen, onClose, voteType, specialty }: ShareModalP
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-8 shadow-2xl"
+            className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-slate-800 p-8 shadow-2xl border border-slate-700"
           >
             <button
               onClick={onClose}
-              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-200 transition-colors"
             >
               <X size={24} />
             </button>
 
             <div className="text-center">
               <div className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full ${
-                voteType === 'working' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                voteType === 'working' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
               }`}>
                 {voteType === 'working' ? '🟢' : '🔴'}
               </div>
-              <h2 className="mt-4 text-2xl font-bold text-slate-900">Vote Recorded!</h2>
-              <p className="mt-2 text-slate-600">
+              <h2 className="mt-4 text-2xl font-bold text-slate-100">Vote Recorded!</h2>
+              <p className="mt-2 text-slate-300">
                 Thanks for sharing your status. Now help us reach more developers!
               </p>
             </div>
@@ -90,7 +90,7 @@ export function ShareModal({ isOpen, onClose, voteType, specialty }: ShareModalP
               <Button
                 variant="ghost"
                 size="md"
-                className="mt-2 w-full text-slate-500"
+                className="mt-2 w-full text-slate-400 hover:text-slate-200"
                 onClick={onClose}
               >
                 Maybe later

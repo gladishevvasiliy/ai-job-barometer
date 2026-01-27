@@ -46,18 +46,18 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-8 shadow-2xl"
+            className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-slate-800 p-8 shadow-2xl border border-slate-700"
           >
             <button
               onClick={onClose}
-              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-200 transition-colors"
             >
               <X size={24} />
             </button>
 
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-slate-900">Sign in to Vote</h2>
-              <p className="mt-2 text-slate-600">
+              <h2 className="text-2xl font-bold text-slate-100">Sign in to Vote</h2>
+              <p className="mt-2 text-slate-300">
                 Choose a provider to verify your identity and cast your vote.
               </p>
             </div>
@@ -66,7 +66,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <Button
                 variant="outline"
                 size="lg"
-                className="flex items-center justify-center gap-3 border-2 border-slate-100 hover:border-slate-200"
+                className="flex items-center justify-center gap-3 border-2 border-slate-600 hover:border-slate-500"
                 onClick={() => handleSignIn('twitter')}
                 disabled={!!loading}
               >
@@ -79,7 +79,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <Button
                 variant="outline"
                 size="lg"
-                className="flex items-center justify-center gap-3 border-2 border-slate-100 hover:border-slate-200"
+                className="flex items-center justify-center gap-3 border-2 border-slate-600 hover:border-slate-500"
                 onClick={() => handleSignIn('linkedin')}
                 disabled={!!loading}
               >
@@ -89,7 +89,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               */}
             </div>
 
-            <p className="mt-6 text-center text-xs text-slate-400">
+            <p className="mt-6 text-center text-xs text-slate-500">
               By signing in, you agree to our terms of service and privacy policy.
             </p>
           </motion.div>

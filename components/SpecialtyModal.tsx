@@ -42,18 +42,18 @@ export function SpecialtyModal({ isOpen, onClose, onSelect }: SpecialtyModalProp
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-8 shadow-2xl"
+            className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-slate-800 p-8 shadow-2xl border border-slate-700"
           >
             <button
               onClick={onClose}
-              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-200 transition-colors"
             >
               <X size={24} />
             </button>
 
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-slate-900">What do you do?</h2>
-              <p className="mt-2 text-slate-600">
+              <h2 className="text-2xl font-bold text-slate-100">What do you do?</h2>
+              <p className="mt-2 text-slate-300">
                 Select your primary specialization to help us segment the data.
               </p>
             </div>
@@ -65,11 +65,11 @@ export function SpecialtyModal({ isOpen, onClose, onSelect }: SpecialtyModalProp
                   onClick={() => setSelected(specialty.id)}
                   className={`flex items-center justify-between rounded-xl border-2 p-4 text-left transition-all ${
                     selected === specialty.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-slate-100 hover:border-slate-200'
+                      ? 'border-blue-500 bg-blue-500/20'
+                      : 'border-slate-700 hover:border-slate-600 bg-slate-700/50'
                   }`}
                 >
-                  <span className={`font-medium ${selected === specialty.id ? 'text-blue-700' : 'text-slate-700'}`}>
+                  <span className={`font-medium ${selected === specialty.id ? 'text-blue-300' : 'text-slate-200'}`}>
                     {specialty.label}
                   </span>
                   {selected === specialty.id && (
