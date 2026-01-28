@@ -194,11 +194,11 @@ export default function Home() {
                     {userVote.vote_type === 'working' ? "I'm Working" : "AI Got My Job"}
                   </span>
                 </p>
-                <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                <div className="mt-4 flex flex-col items-center justify-center gap-4 w-full">
                   <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-slate-300 border-slate-600 hover:bg-slate-700/50"
+                    variant="secondary"
+                    size="lg"
+                    className="h-14 w-full sm:w-auto sm:min-w-[200px] px-8 text-xl font-bold rounded-full shadow-lg shadow-slate-900/50 hover:shadow-slate-800/40 transition-shadow inline-flex items-center justify-center gap-3 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600"
                     onClick={() => {
                       const url = typeof window !== 'undefined' ? window.location.origin : ''
                       const text = `I voted on the AI Job Barometer — check the results for ${userVote.specialty} devs 👇`
@@ -208,12 +208,15 @@ export default function Home() {
                       )
                     }}
                   >
+                    <svg viewBox="0 0 24 24" className="w-6 h-6 shrink-0" fill="currentColor" aria-hidden>
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
                     Share on X
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-slate-400 hover:text-slate-200"
+                    className="mt-1 text-slate-400 hover:text-slate-200"
                     onClick={() => handleVoteClick(userVote.vote_type === 'working' ? 'ai_replaced' : 'working')}
                   >
                     Change vote
