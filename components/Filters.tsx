@@ -33,9 +33,10 @@ const restSpecialties = allSpecialties.filter((s) =>
 )
 
 const periods = [
-  { id: 'all', label: 'All Time' },
-  { id: '7d', label: '7 Days' },
-  { id: '30d', label: '30 Days' },
+  { id: '3m', label: '3 months' },
+  { id: '6m', label: '6 months' },
+  { id: '1y', label: '1 year' },
+  { id: 'all', label: 'All time' },
 ]
 
 export function Filters({ specialty, period, onSpecialtyChange, onPeriodChange, disabled }: FiltersProps) {

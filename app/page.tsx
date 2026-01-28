@@ -194,13 +194,31 @@ export default function Home() {
                     {userVote.vote_type === 'working' ? "I'm Working" : "AI Got My Job"}
                   </span>
                 </p>
-                <Button 
-                  variant="ghost" 
-                  className="mt-2 text-slate-400 hover:text-slate-200"
-                  onClick={() => handleVoteClick(userVote.vote_type === 'working' ? 'ai_replaced' : 'working')}
-                >
-                  Change vote
-                </Button>
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-slate-300 border-slate-600 hover:bg-slate-700/50"
+                    onClick={() => {
+                      const url = typeof window !== 'undefined' ? window.location.origin : ''
+                      const text = `I voted on the AI Job Barometer — check the results for ${userVote.specialty} devs 👇`
+                      window.open(
+                        `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+                        '_blank'
+                      )
+                    }}
+                  >
+                    Share on X
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-slate-400 hover:text-slate-200"
+                    onClick={() => handleVoteClick(userVote.vote_type === 'working' ? 'ai_replaced' : 'working')}
+                  >
+                    Change vote
+                  </Button>
+                </div>
               </div>
             )}
           </div>

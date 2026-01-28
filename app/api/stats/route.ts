@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     seedQuery = seedQuery.eq('specialty', specialty)
   }
   if (period && period !== 'all') {
-    const days = period === '7d' ? 7 : period === '30d' ? 30 : 0
+    const days = period === '3m' ? 90 : period === '6m' ? 180 : period === '1y' ? 365 : 0
     if (days > 0) {
       const date = new Date()
       date.setDate(date.getDate() - days)
