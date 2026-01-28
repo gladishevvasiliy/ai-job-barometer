@@ -1,16 +1,19 @@
 'use client'
 
+import { useState } from 'react'
 import { Specialty } from '@/types'
+import { clsx } from 'clsx'
 
 interface FiltersProps {
   specialty: Specialty | 'all'
   period: string
   onSpecialtyChange: (specialty: Specialty | 'all') => void
   onPeriodChange: (period: string) => void
+  disabled?: boolean
 }
 
-const specialties: { id: Specialty | 'all'; label: string }[] = [
-  { id: 'all', label: 'All Specialties' },
+const allSpecialties: { id: Specialty | 'all'; label: string }[] = [
+  { id: 'all', label: 'All' },
   { id: 'frontend', label: 'Frontend' },
   { id: 'backend', label: 'Backend' },
   { id: 'qa', label: 'QA' },
@@ -22,39 +25,101 @@ const specialties: { id: Specialty | 'all'; label: string }[] = [
   { id: 'pm', label: 'PM' },
 ]
 
+const primarySpecialties = allSpecialties.filter((s) =>
+  ['frontend', 'backend', 'qa'].includes(s.id)
+)
+const restSpecialties = allSpecialties.filter((s) =>
+  !['frontend', 'backend', 'qa'].includes(s.id)
+)
+
 const periods = [
   { id: 'all', label: 'All Time' },
-  { id: '7d', label: 'Last 7 Days' },
-  { id: '30d', label: 'Last 30 Days' },
+  { id: '7d', label: '7 Days' },
+  { id: '30d', label: '30 Days' },
 ]
 
-export function Filters({ specialty, period, onSpecialtyChange, onPeriodChange }: FiltersProps) {
+export function Filters({ specialty, period, onSpecialtyChange, onPeriodChange, disabled }: FiltersProps) {
+  const [expanded, setExpanded] = useState(false)
+  const tabBase = 'rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
+  const tabInactive = 'bg-slate-800/80 text-slate-400 hover:bg-slate-700 hover:text-slate-300'
+  const tabActive = 'bg-slate-600 text-slate-100'
+  const tabDisabled = 'disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none'
+  const visibleSpecialties = expanded ? allSpecialties : primarySpecialties
+
   return (
-    <div className="flex flex-wrap items-center justify-center gap-4">
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Specialization</label>
-        <select
-          value={specialty}
-          onChange={(e) => onSpecialtyChange(e.target.value as Specialty | 'all')}
-          className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-200 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+    <div className="flex flex-col items-center gap-6 w-full">
+      <div className="flex flex-col items-center gap-2 w-full max-w-2xl">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Specialization</span>
+        <div
+          className={clsx(
+            'flex flex-wrap justify-center gap-2',
+            disabled && 'opacity-50 pointer-events-none'
+          )}
+          role="tablist"
+          aria-label="Specialization"
         >
-          {specialties.map((s) => (
-            <option key={s.id} value={s.id} className="bg-slate-800">{s.label}</option>
+          {visibleSpecialties.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              role="tab"
+              aria-selected={specialty === s.id}
+              disabled={disabled}
+              onClick={() => onSpecialtyChange(s.id)}
+              className={clsx(
+                tabBase,
+                specialty === s.id ? tabActive : tabInactive,
+                tabDisabled
+              )}
+            >
+              {s.label}
+            </button>
           ))}
-        </select>
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => setExpanded((e) => !e)}
+            className={clsx(
+              tabBase,
+              tabInactive,
+              tabDisabled
+            )}
+            aria-expanded={expanded}
+            aria-label={expanded ? 'Show less specialties' : 'Show more specialties'}
+          >
+            {expanded ? '−' : '…'}
+          </button>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Time Period</label>
-        <select
-          value={period}
-          onChange={(e) => onPeriodChange(e.target.value)}
-          className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-200 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+      <div className="flex flex-col items-center gap-2">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Time Period</span>
+        <div
+          className={clsx(
+            'inline-flex flex-wrap justify-center gap-2',
+            disabled && 'opacity-50 pointer-events-none'
+          )}
+          role="tablist"
+          aria-label="Time period"
         >
           {periods.map((p) => (
-            <option key={p.id} value={p.id} className="bg-slate-800">{p.label}</option>
+            <button
+              key={p.id}
+              type="button"
+              role="tab"
+              aria-selected={period === p.id}
+              disabled={disabled}
+              onClick={() => onPeriodChange(p.id)}
+              className={clsx(
+                tabBase,
+                period === p.id ? tabActive : tabInactive,
+                tabDisabled
+              )}
+            >
+              {p.label}
+            </button>
           ))}
-        </select>
+        </div>
       </div>
     </div>
   )

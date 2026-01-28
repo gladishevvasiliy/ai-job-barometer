@@ -1,19 +1,65 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { clsx } from 'clsx'
+import GaugeChart from 'react-gauge-chart'
 
 export interface BarometerVariantProps {
   percentage: number // 0-100 (percentage of red votes)
   isRevealed: boolean
   totalVotes: number
+  workingCount: number
+  aiReplacedCount: number
+  isLoading?: boolean
 }
 
-export function BarometerVariantClassic({ percentage, isRevealed, totalVotes }: BarometerVariantProps) {
-  // Map 0-100 to rotation: -75deg (green) to 75deg (red) to keep needle visually inside the gauge
-  const minAngle = -75
-  const maxAngle = 75
-  const rotation = minAngle + (percentage / 100) * (maxAngle - minAngle)
+const DURATION_MS = 1000
+
+function animateValue(
+  from: number,
+  to: number,
+  durationMs: number,
+  onUpdate: (value: number) => void
+) {
+  const start = performance.now()
+  const run = (now: number) => {
+    const elapsed = now - start
+    const t = Math.min(1, elapsed / durationMs)
+    const eased = 1 - (1 - t) ** 2 // easeOutQuad
+    const value = Math.round(from + (to - from) * eased)
+    onUpdate(value)
+    if (t < 1) requestAnimationFrame(run)
+  }
+  requestAnimationFrame(run)
+}
+
+export function BarometerVariantClassic({ percentage, isRevealed, totalVotes, workingCount, aiReplacedCount, isLoading }: BarometerVariantProps) {
+  const clamped = Math.max(0, Math.min(100, percentage))
+  const gaugePercent = clamped / 100
+
+  const [displayedTotal, setDisplayedTotal] = useState(0)
+  const [displayedWorking, setDisplayedWorking] = useState(0)
+  const [displayedReplaced, setDisplayedReplaced] = useState(0)
+
+  useEffect(() => {
+    if (isLoading) return
+    animateValue(displayedTotal, totalVotes, DURATION_MS, setDisplayedTotal)
+    // displayedTotal intentionally omitted so animation runs once per target change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totalVotes, isLoading])
+
+  useEffect(() => {
+    if (isLoading) return
+    animateValue(displayedWorking, workingCount, DURATION_MS, setDisplayedWorking)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workingCount, isLoading])
+
+  useEffect(() => {
+    if (isLoading) return
+    animateValue(displayedReplaced, aiReplacedCount, DURATION_MS, setDisplayedReplaced)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aiReplacedCount, isLoading])
 
   return (
     <div className="relative flex flex-col items-center">
@@ -22,50 +68,26 @@ export function BarometerVariantClassic({ percentage, isRevealed, totalVotes }: 
         "relative w-full max-w-[400px] transition-all duration-1000 ease-out",
         !isRevealed && "blur-[12px] select-none pointer-events-none"
       )}>
-        {/* SVG Gauge */}
-        <svg viewBox="0 0 200 120" className="w-full">
-          {/* Pizza-like solid sectors with equal angles (three equal slices of the semicircle) */}
-          {/* Green Zone (left third) */}
-          <path
-            d="M 100 100 L 20 100 A 80 80 0 0 1 60 31 Z"
-            fill="#22c55e"
+        {/* Gauge Chart */}
+        <div className="w-full max-w-[400px]">
+          <GaugeChart
+            id="ai-job-barometer-gauge"
+            nrOfLevels={3}
+            arcsLength={[1 / 3, 1 / 3, 1 / 3]}
+            colors={['#22c55e', '#eab308', '#ef4444']}
+            arcWidth={0.3}
+            percent={isLoading ? 0.5 : gaugePercent}
+            hideText
+            needleColor="#e5e7eb"
+            needleBaseColor="#e5e7eb"
+            animate={isRevealed && !isLoading}
           />
-          {/* Yellow Zone (middle third) */}
-          <path
-            d="M 100 100 L 60 31 A 80 80 0 0 1 140 31 Z"
-            fill="#eab308"
-          />
-          {/* Red Zone (right third) */}
-          <path
-            d="M 100 100 L 140 31 A 80 80 0 0 1 180 100 Z"
-            fill="#ef4444"
-          />
-
-          {/* Needle */}
-          <motion.g
-            initial={{ rotate: -90 }}
-            animate={{ rotate: isRevealed ? rotation : 0 }}
-            transition={{ type: 'spring', stiffness: 50, damping: 15 }}
-            style={{ originX: '100px', originY: '100px' }}
-          >
-            <line
-              x1="100"
-              y1="100"
-              x2="100"
-              y2="30"
-              stroke="#f1f5f9"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <circle cx="100" cy="100" r="5" fill="#f1f5f9" />
-          </motion.g>
-        </svg>
+        </div>
 
         {/* Legend */}
-        <div className="mt-4 flex justify-between px-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
-          <span className="text-green-400">Working</span>
-          <span className="text-yellow-400">Caution</span>
-          <span className="text-red-400">AI Replaced</span>
+        <div className="mt-4 flex justify-between items-center gap-3 px-2 sm:px-4 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <span className="text-green-400 whitespace-nowrap shrink-0">Working {isLoading ? '…' : isRevealed ? displayedWorking.toLocaleString() : '—'}</span>
+          <span className="text-red-400 whitespace-nowrap shrink-0">AI Replaced {isLoading ? '…' : isRevealed ? displayedReplaced.toLocaleString() : '—'}</span>
         </div>
       </div>
 
@@ -81,17 +103,17 @@ export function BarometerVariantClassic({ percentage, isRevealed, totalVotes }: 
       {/* Statistics */}
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: isRevealed ? 1 : 0.3, y: 0 }}
+        animate={{ opacity: isRevealed && !isLoading ? 1 : 0.3, y: 0 }}
         className="mt-8 text-center"
       >
         <div className="text-5xl font-black text-slate-100">
-          {isRevealed ? `${Math.round(percentage)}%` : '??%'}
+          {isLoading ? '...' : isRevealed ? `${Math.round(percentage)}%` : '??%'}
         </div>
         <p className="mt-2 text-slate-300 font-medium">
-          of developers say AI replaced them
+          {isLoading ? 'Loading results...' : 'of developers say AI replaced them'}
         </p>
         <div className="mt-4 inline-block rounded-full bg-slate-700 px-4 py-1.5 text-sm font-semibold text-slate-300">
-          {totalVotes.toLocaleString()} total votes
+          {isLoading ? '...' : `${displayedTotal.toLocaleString()} total votes`}
         </div>
       </motion.div>
     </div>
