@@ -28,7 +28,13 @@ A simple, interactive tool for the dev community to track how AI is actually aff
 
 2. **Supabase Setup:**
    - Create a project at [supabase.com](https://supabase.com).
-   - Run the SQL migration found in `supabase/migrations/00001_initial_schema.sql`.
+   - **Миграции и сид** (Supabase CLI из корня проекта):
+     ```bash
+     supabase link --project-ref <your-project-ref>
+     supabase db push
+     supabase db execute -f scripts/seed-votes.sql
+     ```
+     Либо вручную в Dashboard → SQL Editor: выполнить по очереди `supabase/migrations/00001_initial_schema.sql`, `00002_seed_votes.sql`, затем (опционально) `scripts/seed-votes.sql`. Удалить сид позже: `DELETE FROM seed_votes;`
    - Enable Twitter/LinkedIn providers in Auth settings.
 
 3. **Env Vars:**
