@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Twitter } from 'lucide-react'
+import { X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { VoteType, Specialty } from '@/types'
 
@@ -79,18 +79,20 @@ export function ShareModal({ isOpen, onClose, voteType, specialty }: ShareModalP
 
             <div className="mt-8">
               <Button
-                variant="primary"
+                variant="secondary"
                 size="lg"
-                className="w-full bg-[#1DA1F2] hover:bg-[#1a8cd8] flex items-center justify-center gap-3"
+                className="h-14 w-full px-8 text-xl font-bold rounded-full shadow-lg shadow-slate-900/50 hover:shadow-slate-800/40 transition-shadow inline-flex items-center justify-center gap-3 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600"
                 onClick={handleShare}
               >
-                <Twitter size={20} fill="currentColor" />
-                Share on Twitter
+                <svg viewBox="0 0 24 24" className="w-6 h-6 shrink-0" fill="currentColor" aria-hidden>
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                Share on X
               </Button>
               <Button
                 variant="ghost"
-                size="md"
-                className="mt-2 w-full text-slate-400 hover:text-slate-200"
+                size="sm"
+                className="mt-4 w-full text-slate-400 hover:text-slate-200"
                 onClick={onClose}
               >
                 Maybe later

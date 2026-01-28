@@ -14,6 +14,22 @@ import { initPostHog, captureEvent } from '@/lib/posthog'
 import { User } from '@supabase/supabase-js'
 import { clsx } from 'clsx'
 
+const viralTextsWorking = [
+  "Still writing code in 2026. The machines work FOR me, not instead of me. 🟢",
+  "Plot twist: I'm the one training the AI. Job security level: Tony Stark. 🦾",
+  "They said AI would replace devs by 2025. My Git commits disagree. 💚",
+  "I asked ChatGPT to replace me. It said 'skill issue'. 😎",
+  "Neo took the green pill. Still employed. 🟢",
+]
+
+const viralTextsReplaced = [
+  "I, for one, welcome our new AI overlords. 🤖 They type faster anyway.",
+  "Winter came for my job. The AI sends its regards. ❄️🔴",
+  "I took the red pill... and woke up to a rejection email. Matrix was right.",
+  "My code review is now just Copilot talking to itself. I'm the third wheel. 🔴",
+  "Hasta la vista, salary. I'll be back... maybe. 🤖",
+]
+
 export default function Home() {
   const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
@@ -201,7 +217,9 @@ export default function Home() {
                     className="h-14 w-full sm:w-auto sm:min-w-[200px] px-8 text-xl font-bold rounded-full shadow-lg shadow-slate-900/50 hover:shadow-slate-800/40 transition-shadow inline-flex items-center justify-center gap-3 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600"
                     onClick={() => {
                       const url = typeof window !== 'undefined' ? window.location.origin : ''
-                      const text = `I voted on the AI Job Barometer — check the results for ${userVote.specialty} devs 👇`
+                      const texts = userVote.vote_type === 'working' ? viralTextsWorking : viralTextsReplaced
+                      const randomText = texts[Math.floor(Math.random() * texts.length)]
+                      const text = `${randomText}\n\nCheck the AI Job Barometer for ${userVote.specialty} devs:`
                       window.open(
                         `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
                         '_blank'
